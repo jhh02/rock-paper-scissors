@@ -1,14 +1,14 @@
+const body = document.querySelector("body");
 const btns = document.querySelectorAll(".player-play");
 let result = document.querySelector(".result");
 let realResult = document.querySelector(".realResult");
 const playAgainDiv = document.querySelector(".play-again");
-const body = document.querySelector("body");
 
-let gameOver = false;
+const gameScore = 5;
 let userScore = 0;
 let compScore = 0;
 let created = false;
-const gameScore = 5;
+let gameOver = false;
 
 function getRandomNumber() {
   return Math.floor(Math.random() * 3);
@@ -37,35 +37,34 @@ function draw(player) {
   return `Draw! You and computer played ${player}!`;
 }
 
-function playRound(playerSelection, computerSelection) {
-  playerSelection = this.id;
-  computerSelection = computerPlay();
-  console.log(playerSelection, computerSelection);
-  // draw
-  if (playerSelection === computerSelection) {
-    result.textContent = draw(playerSelection);
+function checkRound(playerSelection, computerSelection) {
+  if (playerSelection !== computerSelection) {
+    if (playerSelection === "rock") {
+      return (result.textContent =
+        computerSelection === "scissors"
+          ? win(playerSelection, computerSelection)
+          : lose(playerSelection, computerSelection));
+    } else if (playerSelection === "paper") {
+      return (result.textContent =
+        computerSelection === "rock"
+          ? win(playerSelection, computerSelection)
+          : lose(playerSelection, computerSelection));
+    } else if (playerSelection === "scissors") {
+      return (result.textContent =
+        computerSelection === "paper"
+          ? win(playerSelection, computerSelection)
+          : lose(playerSelection, computerSelection));
+    }
+  } else {
+    return (result.textContent = draw(playerSelection));
   }
-  // player: rock
-  else if (playerSelection === "rock") {
-    result.textContent =
-      computerSelection === "scissors"
-        ? win(playerSelection, computerSelection)
-        : lose(playerSelection, computerSelection);
-  }
-  // player: paper
-  else if (playerSelection === "paper") {
-    result.textContent =
-      computerSelection === "rock"
-        ? win(playerSelection, computerSelection)
-        : lose(playerSelection, computerSelection);
-  }
-  // player: scissors
-  else if (playerSelection === "scissors") {
-    result.textContent =
-      computerSelection === "paper"
-        ? win(playerSelection, computerSelection)
-        : lose(playerSelection, computerSelection);
-  }
+}
+
+function playRound(e) {
+  let playerSelection = this.id;
+  let computerSelection = computerPlay();
+  checkRound(playerSelection, computerSelection);
+  // console.log(e, playerSelection, computerSelection);
 
   // Check who's the winner
   if (userScore === gameScore || compScore === gameScore) {
@@ -78,44 +77,45 @@ function playRound(playerSelection, computerSelection) {
   }
 }
 
-function playOneMoreTime() {
+function reset() {
   userScore = 0;
   compScore = 0;
-  playAgainDiv.classList.add("hidden");
-  realResult.classList.add("hidden");
   gameOver = false;
   btns.forEach((btn) => {
     btn.disabled = false;
   });
+  realResult.classList.toggle("hidden");
+  playAgainDiv.classList.toggle("hidden");
 }
 
 function exit() {
   body.classList.add("hidden");
+  // Add some nice image or animation
+  // Add a button to ask play again
+  // Yes
+  // body.classList.remove('hidden')
 }
 
 function playAgain() {
-  // Ask if player wants to play again
-  const para = document.createElement("p");
-  const yesBtn = document.createElement("button");
-  const noBtn = document.createElement("button");
-  para.textContent = "Do you want to play again?";
-  yesBtn.textContent = "Yes";
-  noBtn.textContent = "No";
-  if(!created){
+  if (!created) {
+    const para = document.createElement("p");
+    const yesBtn = document.createElement("button");
+    const noBtn = document.createElement("button");
+    para.textContent = "Do you want to play again?";
+    yesBtn.textContent = "Yes";
+    noBtn.textContent = "No";
     playAgainDiv.appendChild(para);
     playAgainDiv.appendChild(yesBtn);
     playAgainDiv.appendChild(noBtn);
+    yesBtn.addEventListener("click", reset);
+    noBtn.addEventListener("click", exit);
     created = true;
   }
-  // yes
-  yesBtn.addEventListener("click", playOneMoreTime);
-  // no
-  noBtn.addEventListener("click", exit);
+  playAgainDiv.classList.toggle("hidden");
 }
 
 function showResult() {
-  playAgainDiv.classList.remove("hidden");
-  realResult.classList.remove("hidden");
+  realResult.classList.toggle("hidden");
   if (gameOver) {
     realResult.textContent =
       userScore === gameScore
