@@ -1,4 +1,14 @@
-let score = 0;
+const btns = document.querySelectorAll(".player-play");
+let result = document.querySelector(".result");
+let realResult = document.querySelector(".realResult");
+const playAgainDiv = document.querySelector(".play-again");
+const body = document.querySelector("body");
+
+let gameOver = false;
+let userScore = 0;
+let compScore = 0;
+let created = false;
+const gameScore = 5;
 
 function getRandomNumber() {
   return Math.floor(Math.random() * 3);
@@ -13,27 +23,13 @@ function computerPlay() {
     : "scissors";
 }
 
-function playerPlay() {
-  let playerPlay = prompt(
-    "Choose your play: rock, paper, or scissors"
-  ).toLowerCase();
-  while (
-    playerPlay !== "rock" &&
-    playerPlay !== "paper" &&
-    playerPlay !== "scissors"
-  ) {
-    playerPlay = prompt("Enter valid input");
-  }
-  return playerPlay;
-}
-
 function win(player, computer) {
-  score++;
+  userScore++;
   return `You win! ${player} beats ${computer}`;
 }
 
 function lose(player, computer) {
-  score--;
+  compScore++;
   return `You Lose! ${computer} beats ${player}`;
 }
 
@@ -42,44 +38,95 @@ function draw(player) {
 }
 
 function playRound(playerSelection, computerSelection) {
+  playerSelection = this.id;
+  computerSelection = computerPlay();
+  console.log(playerSelection, computerSelection);
   // draw
   if (playerSelection === computerSelection) {
-    return draw(playerSelection);
+    result.textContent = draw(playerSelection);
   }
   // player: rock
   else if (playerSelection === "rock") {
-    return computerSelection === "scissors"
-      ? win(playerSelection, computerSelection)
-      : lose(playerSelection, computerSelection);
+    result.textContent =
+      computerSelection === "scissors"
+        ? win(playerSelection, computerSelection)
+        : lose(playerSelection, computerSelection);
   }
   // player: paper
   else if (playerSelection === "paper") {
-    return computerSelection === "rock"
-      ? win(playerSelection, computerSelection)
-      : lose(playerSelection, computerSelection);
+    result.textContent =
+      computerSelection === "rock"
+        ? win(playerSelection, computerSelection)
+        : lose(playerSelection, computerSelection);
   }
   // player: scissors
   else if (playerSelection === "scissors") {
-    return computerSelection === "paper"
-      ? win(playerSelection, computerSelection)
-      : lose(playerSelection, computerSelection);
+    result.textContent =
+      computerSelection === "paper"
+        ? win(playerSelection, computerSelection)
+        : lose(playerSelection, computerSelection);
+  }
+
+  // Check who's the winner
+  if (userScore === gameScore || compScore === gameScore) {
+    gameOver = true;
+    btns.forEach((btn) => {
+      btn.disabled = true;
+    });
+    showResult();
+    playAgain();
   }
 }
 
-function game(player, computer) {
-  for (let i = 0; i < 5; i++) {
-  let result = playRound(player(), computer());
-  console.log(result)
+function playOneMoreTime() {
+  userScore = 0;
+  compScore = 0;
+  playAgainDiv.classList.add("hidden");
+  realResult.classList.add("hidden");
+  gameOver = false;
+  btns.forEach((btn) => {
+    btn.disabled = false;
+  });
+}
+
+function exit() {
+  body.classList.add("hidden");
+}
+
+function playAgain() {
+  // Ask if player wants to play again
+  const para = document.createElement("p");
+  const yesBtn = document.createElement("button");
+  const noBtn = document.createElement("button");
+  para.textContent = "Do you want to play again?";
+  yesBtn.textContent = "Yes";
+  noBtn.textContent = "No";
+  if(!created){
+    playAgainDiv.appendChild(para);
+    playAgainDiv.appendChild(yesBtn);
+    playAgainDiv.appendChild(noBtn);
+    created = true;
   }
-  return score > 0
-    ? "Congratulation! You won the game! "
-    : score < 0
-    ? "You lost to computer!"
-    : "You tied.";
+  // yes
+  yesBtn.addEventListener("click", playOneMoreTime);
+  // no
+  noBtn.addEventListener("click", exit);
+}
+
+function showResult() {
+  playAgainDiv.classList.remove("hidden");
+  realResult.classList.remove("hidden");
+  if (gameOver) {
+    realResult.textContent =
+      userScore === gameScore
+        ? "Congratulation! You won the game! "
+        : "You lost to computer!";
+  }
+  return;
 }
 
 function init() {
-  console.log(game(playerPlay, computerPlay));
+  btns.forEach((btn) => btn.addEventListener("click", playRound));
 }
 
 init();
